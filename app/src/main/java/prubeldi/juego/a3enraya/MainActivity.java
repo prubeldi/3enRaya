@@ -39,6 +39,14 @@ public class MainActivity extends AppCompatActivity {
     //unique id of opponent
     private String opponentUniqueId = "0";
 
+    // values must be matching or waiting. When a user create a new connection/room and he is waiting for other to join then the value will be waiting.
+    private String status = "matching";
+
+
+    //player turn
+    private String playerTurn = "";
+
+    private String connectionId = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,21 +108,60 @@ public class MainActivity extends AppCompatActivity {
 
                         // Checking all connections if other user are also witing for a user to play th match
 
-                        for (DataSnapshot connections : shapshot.getChildren()){
+                        for (DataSnapshot connections : snapshot.getChildren()){
 
                             //getting connection unique id
-                            long conId = Long.parseLong(connections.getKey());
+                            String conId =connections.getKey();
 
                             //2 player are required to play the game
                             //if getPlayerCount is 1 it means other player is waiting for a opponent to play the game
                             //else if getPlayerCount is 2 it means this connection has completed with 2 player
-                            int getPlayersCount = (int)connections.getChildren();
+                            int getPlayersCount = (int)connections.getChildrenCount();
+
+                            //afthe create a new connection waiting for othe to joing
+                            if (status.equals("Waiting")){
+
+                                //if getPlayerCount is 2 it means other player joined th match
+                                if (getPlayersCount == 2){
+                                    playerTurn = playerUniqueId;
+                                    applyPlayerTurn(playerTurn);
+
+                                    boolean playerFound = false;
+                                    for (DataSnapshot players : connections.getChildren()){
+                                        String getPlayerUniqueId = players.getKey();
+                                        if (getPlayerUniqueId.equals(playerUniqueId)){
+                                            playerFound = true;
+                                        }
+                                        else if (playerFound) {
+                                            String getOpponentPlayerName = players.child("player_name").getValue(String.class);
+                                            opponentUniqueId = players.getKey();
+
+                                            player2TV.setText(getOpponentPlayerName);
+
+                                            connectionId = conId;
+                                            opponentFound = true;
+
+                                            databaseReference.child("turns").child(connectionId).addValueEventListener();
+                                        }
+                                    }
+
+                                }
+
+                            }
                         }
                     }
 
+                    // if there is no connection available in the firebase then create a new connection.
+                    // it is like creating a room and waitin for other players to join the room
                     else {
 
+                        //generating unique id for the connection
                         String connectionsUniqueId = String.valueOf(System.currentTimeMillis());
+
+                        //adding first player to the connection and waiting for other to complete the connection and play the gam
+                        snapshot.child(connectionsUniqueId).child(playerUniqueId).child("player_name").getRef().setValue(getPlayerName);
+
+                        status= "Waiting";
                     }
                 }
 
@@ -125,5 +172,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+    private void applyPlayerTurn(String playerUniqueId2){
+        if (playerUniqueId2.equals(playerUniqueId)){
+            player1Layout.setBackgroundResource(R.drawable.round_back_dark_blue_stroke);
+            player2Layout.setBackgroundResource(R.drawable.round_back_dark_blue_20);
+        }
+        else {
+            player2Layout.setBackgroundResource(R.drawable.round_back_dark_blue_stroke);
+            player1Layout.setBackgroundResource(R.drawable.round_back_dark_blue_20);
+        }
     }
 }
