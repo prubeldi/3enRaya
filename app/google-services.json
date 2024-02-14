@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "629425866279",
+    "project_id": "enraya-5bf81",
+    "storage_bucket": "enraya-5bf81.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629425866279:android:9203d4b059ea9551b4f002",
+        "android_client_info": {
+          "package_name": "prubeldi.juego.a3enraya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5pUkZWpN5xhAqlXuN901lYXmkvg5DR10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
