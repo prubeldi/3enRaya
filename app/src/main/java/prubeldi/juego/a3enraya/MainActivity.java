@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     //winning combinations
     private final List<int[]> combinacionesList = new ArrayList<>();
+    private final List<String> doneBoxes = new ArrayList<>();
 
     // player unique ID
     private String playerUniqueId = "0";
@@ -47,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
     private String playerTurn = "";
 
     private String connectionId = "";
+
+
+    ValueEventListener turnsEventListener,wonEventListener;
+
+    private final  String[]boxesSelectedBy = {"","","","","","","","","",};
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,14 +149,61 @@ public class MainActivity extends AppCompatActivity {
 
                                             connectionId = conId;
                                             opponentFound = true;
-
-                                            databaseReference.child("turns").child(connectionId).addValueEventListener();
+                                                //adding turns listener and won lister to the database reference
+                                            databaseReference.child("turns").child(connectionId).addValueEventListener(turnsEventListener);
+                                            databaseReference.child("won").child(connectionId).addValueEventListener(wonEventListener);
+                                          //hide progress dialog
+                                            if (progressDialog.isShowing()){
+                                                progressDialog.dismiss();
+                                            }
+                                            databaseReference.child("connections").removeEventListener(this);
                                         }
                                     }
 
                                 }
 
                             }
+                            else {
+                                if(getPlayersCount == 1){
+                                    connections.child(playerUniqueId).child("player_name").getRef().setValue(getPlayerName);
+
+                                    for (DataSnapshot players : connections.getChildren()){
+                                        String getOpponentName = players.child("player_name").getValue(String.class);
+                                        opponentUniqueId = players.getKey();
+
+
+                                        playerTurn =  opponentUniqueId;
+
+                                        applyPlayerTurn(playerTurn);
+
+                                        player2TV.setText(getOpponentName);
+
+                                        connectionId = conId;
+                                        opponentFound = true;
+
+                                        databaseReference.child("turns").child(connectionId).addValueEventListener(turnsEventListener);
+                                        databaseReference.child("won").child(connectionId).addValueEventListener(wonEventListener);
+
+
+                                        //hide progress dialog
+                                        if (progressDialog.isShowing()){
+                                            progressDialog.dismiss();
+                                        }
+                                        databaseReference.child("connections").removeEventListener(this);
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!opponentFound && !status.equals("waiting")){
+                            //generating unique id for the connection
+                            String connectionsUniqueId = String.valueOf(System.currentTimeMillis());
+
+                            //adding first player to the connection and waiting for other to complete the connection and play the gam
+                            snapshot.child(connectionsUniqueId).child(playerUniqueId).child("player_name").getRef().setValue(getPlayerName);
+
+                            status= "Waiting";
                         }
                     }
 
@@ -172,6 +228,70 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        turnsEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    if (dataSnapshot.getChildrenCount()== 2){
+                        final int getBoxPosition = Integer.parseInt(dataSnapshot.child("box position").getValue(String.class));
+
+                        final String getPlayerId = dataSnapshot.child("player_id").getValue(String.class);
+
+
+                        if(doneBoxes.contains(String.valueOf(getBoxPosition))){
+                            doneBoxes.add(String.valueOf(getBoxPosition));
+
+                            if(getBoxPosition == 1){
+                                
+                            }
+                            else if (getBoxPosition == 2) {
+                                
+                            }
+                            else if (getBoxPosition == 3) {
+
+                            }
+                            else if (getBoxPosition == 4) {
+
+                            }
+                            else if (getBoxPosition == 5) {
+
+                            }
+                            else if (getBoxPosition == 6) {
+
+                            }
+                            else if (getBoxPosition == 7) {
+
+                            }
+                            else if (getBoxPosition == 8) {
+
+                            }
+                            else if (getBoxPosition == 9) {
+
+                            }
+                        }
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+        wonEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
     }
     private void applyPlayerTurn(String playerUniqueId2){
         if (playerUniqueId2.equals(playerUniqueId)){
@@ -182,5 +302,35 @@ public class MainActivity extends AppCompatActivity {
             player2Layout.setBackgroundResource(R.drawable.round_back_dark_blue_stroke);
             player1Layout.setBackgroundResource(R.drawable.round_back_dark_blue_20);
         }
+    }
+
+    private void selectBox(ImageView imageView,int selectedBoxPosition,String selectedByPlayer){
+
+     boxesSelectedBy[selectedBoxPosition - 1] = selectedByPlayer;
+     if (selectedByPlayer.equals(playerUniqueId)){
+         imageView.setImageResource(R.drawable.cross_icon);
+         playerTurn = opponentUniqueId;
+     }
+     else{
+         imageView.setImageResource(R.drawable.zero_icon);
+         playerTurn = playerUniqueId;
+     }
+
+       applyPlayerTurn(playerTurn);
+
+     if()
+    }
+
+    private boolean checkPlayerWin(String playerId){
+      boolean  isPlayerwon = false;
+      for (int i = 0; i< combinacionesList.size();i++){
+          final  int[] combination = combinacionesList.get(i);
+
+
+          if (boxesSelectedBy[combination[0]].equals(playerId) && boxesSelectedBy[combination[1]].equals(playerId) &&
+                  boxesSelectedBy[combination[2]].equals(playerId)){
+              isPlayerwon = true;
+          }
+      }
     }
 }
