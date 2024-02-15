@@ -14,14 +14,14 @@
         android:theme="@style/Theme._3enRaya"
         tools:targetApi="31">
         <!---Creando launcher activiti PlayerName-->
-        <activity android:name=".PlayerName" android:exported="false" />
+        <activity android:name=".PlayerName" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
-
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".MainActivity" android:exported="false">
         </activity>
     </application>
 
